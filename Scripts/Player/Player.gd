@@ -10,11 +10,11 @@ onready var sprintTimer = $SprintTimer
 export var health = 100
 export var mouseSensitivity = 0.1
 export var tiltAmount = 15
-export var sprintGauge = 100
 export var sprintDrain = 2
 export var sprintRecharge = 1
+export var jumpImpulse = 6.0
 
-var gravity = -30
+var gravity = -20
 var walk_speed = 4
 var run_speed = 8
 var crouch_speed = 2
@@ -33,13 +33,11 @@ func _physics_process(delta):
 	velocity.z = desired_velocity.z
 	velocity = move_and_slide(velocity, Vector3.UP, true)
 	if isSprintRecharging == true:
-		sprintGauge += sprintRecharge
+		GlobalPlayerVariables.sprintGauge += sprintRecharge
 	
-	if sprintGauge >= 100:
-		sprintGauge = 100
+	if GlobalPlayerVariables.sprintGauge >= 100:
+		GlobalPlayerVariables.sprintGauge = 100
 		isSprintRecharging = false
-	
-	print(sprintGauge)
 
 
 func _input(event):
@@ -54,8 +52,7 @@ func _input(event):
 	#Check if the player wants to jump
 	if Input.is_action_just_pressed("move_jump"):
 		if is_on_floor():
-			tiltTween.interpolate_property(self, "global_translation:y", global_translation.y, global_translation.y + 2, .3, tiltTween.TRANS_LINEAR, tiltTween.EASE_IN_OUT)
-			tiltTween.start()
+			velocity.y = jumpImpulse
 		
 	
 	#Check if the player wants to tilt
@@ -78,11 +75,11 @@ func _input(event):
 		crouch_player(1)
 
 	#Check if the player wants to run
-	if Input.is_action_pressed("move_run") and not isCrouching and sprintGauge > 0:
+	if Input.is_action_pressed("move_run") and not isCrouching and GlobalPlayerVariables.sprintGauge > 0:
 		isSprintRecharging = false
 		sprintTimer.stop()
 		max_speed = run_speed
-		sprintGauge -= sprintDrain
+		GlobalPlayerVariables.sprintGauge -= sprintDrain
 	elif Input.is_action_just_released("move_run"):
 		max_speed = walk_speed
 		sprintTimer.start()

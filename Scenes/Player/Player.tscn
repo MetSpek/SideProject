@@ -1,6 +1,7 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Scripts/Player/Player.gd" type="Script" id=1]
+[ext_resource path="res://Scenes/Player/User Interface/UI.tscn" type="PackedScene" id=2]
 
 [sub_resource type="CapsuleShape" id=1]
 radius = 0.3
@@ -27,5 +28,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0 )
 [node name="SprintTimer" type="Timer" parent="."]
 wait_time = 2.0
 one_shot = true
+
+[node name="UI" parent="." instance=ExtResource( 2 )]
 
 [connection signal="timeout" from="SprintTimer" to="." method="_on_SprintTimer_timeout"]

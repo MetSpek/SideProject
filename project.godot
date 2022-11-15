@@ -13,6 +13,10 @@ config_version=4
 config/name="SideProject"
 config/icon="res://icon.png"
 
+[autoload]
+
+GlobalPlayerVariables="*res://Scripts/Player/GlobalPlayerVariables.gd"
+
 [gui]
 
 common/drop_mouse_on_gui_input_disabled=true
