@@ -4,8 +4,12 @@ extends KinematicBody
 
 onready var head = $Waist/Head
 onready var waist = $Waist
-onready var tiltTween = $Waist/Tween
+onready var tiltTween = $Waist/TiltTween
+onready var moveTween = $Waist/MoveTween
 onready var sprintTimer = $SprintTimer
+onready var headRayCast = $headRayCast
+onready var interactRayCast = $Waist/Head/interactRayCast
+onready var interactTimer = $Waist/Head/interactRayCast/InteractTimer
 
 export var health = 100
 export var mouseSensitivity = 0.1
@@ -22,6 +26,19 @@ var max_speed = walk_speed
 var velocity = Vector3()
 var isCrouching = false
 var isSprintRecharging = false
+var isTiltedLeft = false
+var isTiltedRight = false
+
+
+var standSound = 0.1
+var crouchSound = .2
+var walkSound = .4
+var sprintSound = 1
+var jumpSound = .5
+var interactSlowSound = .2
+var interactFastSound = 1
+
+var interactTimes = 0
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -56,12 +73,23 @@ func _input(event):
 		
 	
 	#Check if the player wants to tilt
-	if Input.is_action_just_pressed("move_tilt_left"):
-		tilt_player(tiltAmount)
-	elif Input.is_action_just_pressed("move_tilt_right"):
-		tilt_player(-tiltAmount)
-	elif Input.is_action_just_released("move_tilt_left") or Input.is_action_just_released("move_tilt_right") or Input.is_action_pressed("move_tilt_left") and Input.is_action_pressed("move_tilt_right"):
-		tilt_player(0)
+	if Input.is_action_pressed("move_tilt_left") and Input.is_action_pressed("move_tilt_right"):
+		isTiltedLeft = false
+		isTiltedRight = false
+		tilt_player(0, 0)
+	elif Input.is_action_pressed("move_tilt_left") and not isTiltedLeft:
+		isTiltedLeft = true
+		tilt_player(tiltAmount, -.5)
+	elif Input.is_action_pressed("move_tilt_right") and not isTiltedRight:
+		isTiltedRight = true
+		tilt_player(-tiltAmount, .5)
+	elif Input.is_action_just_released("move_tilt_left") and isTiltedLeft:
+		isTiltedLeft = false
+		tilt_player(0, 0)
+	elif Input.is_action_just_released("move_tilt_right") and isTiltedRight:
+		isTiltedRight = false
+		tilt_player(0, 0)
+
 	
 	#Check if the player wants to crouch
 	if Input.is_action_just_pressed("move_crouch"):
@@ -69,10 +97,11 @@ func _input(event):
 		isCrouching = true
 		max_speed = crouch_speed
 		crouch_player(.5)
-	elif Input.is_action_just_released("move_crouch"):
+	elif not Input.is_action_pressed("move_crouch") and not headRayCast.is_colliding():
 		isCrouching = false
 		max_speed = walk_speed
 		crouch_player(1)
+	
 
 	#Check if the player wants to run
 	if Input.is_action_pressed("move_run") and not isCrouching and GlobalPlayerVariables.sprintGauge > 0:
@@ -83,6 +112,14 @@ func _input(event):
 	elif Input.is_action_just_released("move_run"):
 		max_speed = walk_speed
 		sprintTimer.start()
+
+	#Check if the player wants to interact
+	if Input.is_action_just_pressed("interact"):
+		if interactRayCast.is_colliding():
+			if interactTimes < 2:
+				interactTimer.stop()
+				interactTimes += 1
+				interactTimer.start()
 
 func get_input():
 	var input_dir = Vector3()
@@ -98,9 +135,11 @@ func get_input():
 	input_dir = input_dir.normalized()
 	return input_dir
 
-func tilt_player(dir):
+func tilt_player(dir, amount):
+	moveTween.interpolate_property(waist, "translation:x", waist.translation.x, amount, .2, moveTween.TRANS_LINEAR, moveTween.EASE_IN_OUT)
 	tiltTween.interpolate_property(waist, "rotation_degrees:z", waist.rotation_degrees.z, dir, .2, tiltTween.TRANS_LINEAR, tiltTween.EASE_IN_OUT)
 	tiltTween.start()
+	moveTween.start()
 
 func crouch_player(dir):
 	tiltTween.interpolate_property($CollisionShape, "scale:y", $CollisionShape.scale.y, dir, .2, tiltTween.TRANS_LINEAR, tiltTween.EASE_IN_OUT)
@@ -108,3 +147,14 @@ func crouch_player(dir):
 
 func _on_SprintTimer_timeout():
 	isSprintRecharging = true
+
+
+func _on_InteractTimer_timeout():
+	if interactRayCast.get_collider().has_method("use"):
+		if interactTimes == 1:
+			interactRayCast.get_collider().use("Slow")
+		else:
+			interactRayCast.get_collider().use("Fast")
+	else:
+		print("This interactable has no use method yet...")
+	interactTimes = 0

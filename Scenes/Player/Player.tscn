@@ -18,12 +18,29 @@ shape = SubResource( 1 )
 [node name="Waist" type="Spatial" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 0 )
 
-[node name="Tween" type="Tween" parent="Waist"]
+[node name="TiltTween" type="Tween" parent="Waist"]
+
+[node name="MoveTween" type="Tween" parent="Waist"]
 
 [node name="Head" type="Spatial" parent="Waist"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0 )
 
 [node name="Camera" type="Camera" parent="Waist/Head"]
+
+[node name="interactRayCast" type="RayCast" parent="Waist/Head"]
+enabled = true
+cast_to = Vector3( 0, 0, -2.5 )
+collision_mask = 4
+
+[node name="InteractTimer" type="Timer" parent="Waist/Head/interactRayCast"]
+wait_time = 0.3
+one_shot = true
+
+[node name="Hand" type="Spatial" parent="Waist/Head"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, -0.2, -0.273392 )
+
+[node name="CSGSphere" type="CSGSphere" parent="Waist/Head/Hand"]
+radius = 0.1
 
 [node name="SprintTimer" type="Timer" parent="."]
 wait_time = 2.0
@@ -31,4 +48,10 @@ one_shot = true
 
 [node name="UI" parent="." instance=ExtResource( 2 )]
 
+[node name="headRayCast" type="RayCast" parent="."]
+enabled = true
+cast_to = Vector3( 0, 1, 0 )
+collision_mask = 2
+
+[connection signal="timeout" from="Waist/Head/interactRayCast/InteractTimer" to="." method="_on_InteractTimer_timeout"]
 [connection signal="timeout" from="SprintTimer" to="." method="_on_SprintTimer_timeout"]
