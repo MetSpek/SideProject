@@ -7,9 +7,13 @@ onready var waist = $Waist
 onready var tiltTween = $Waist/TiltTween
 onready var moveTween = $Waist/MoveTween
 onready var sprintTimer = $SprintTimer
-onready var headRayCast = $headRayCast
 onready var interactRayCast = $Waist/Head/interactRayCast
 onready var interactTimer = $Waist/Head/interactRayCast/InteractTimer
+
+onready var headRayCastFront = $CrouchRaycasts/headRayCastFront
+onready var headRayCastLeft = $CrouchRaycasts/headRayCastLeft
+onready var headRayCastRight = $CrouchRaycasts/headRayCastRight
+onready var headRayCastBack = $CrouchRaycasts/headRayCastBack
 
 export var health = 100
 export var mouseSensitivity = 0.1
@@ -97,7 +101,7 @@ func _input(event):
 		isCrouching = true
 		max_speed = crouch_speed
 		crouch_player(.5)
-	elif not Input.is_action_pressed("move_crouch") and not headRayCast.is_colliding():
+	elif not Input.is_action_pressed("move_crouch") and not headRayCastFront.is_colliding() and not headRayCastLeft.is_colliding() and not headRayCastRight.is_colliding() and not headRayCastBack.is_colliding():
 		isCrouching = false
 		max_speed = walk_speed
 		crouch_player(1)
