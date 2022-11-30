@@ -18,6 +18,9 @@ onready var headRayCastLeft = $CrouchRaycasts/headRayCastLeft
 onready var headRayCastRight = $CrouchRaycasts/headRayCastRight
 onready var headRayCastBack = $CrouchRaycasts/headRayCastBack
 
+onready var tiltCheckLeft = $Waist/Head/tiltCheckLeft
+onready var tiltCheckRight = $Waist/Head/tiltCheckRight
+
 export var health = 100
 export var mouseSensitivity = 0.1
 export var tiltAmount = 15
@@ -89,11 +92,13 @@ func _input(event):
 			isTiltedRight = false
 			tilt_player(0, 0)
 		elif Input.is_action_pressed("move_tilt_left") and not isTiltedLeft:
-			isTiltedLeft = true
-			tilt_player(tiltAmount, -.5)
+			if not tiltCheckLeft.is_colliding():
+				isTiltedLeft = true
+				tilt_player(tiltAmount, -.5)
 		elif Input.is_action_pressed("move_tilt_right") and not isTiltedRight:
-			isTiltedRight = true
-			tilt_player(-tiltAmount, .5)
+			if not tiltCheckRight.is_colliding():
+				isTiltedRight = true
+				tilt_player(-tiltAmount, .5)
 		elif Input.is_action_just_released("move_tilt_left") and isTiltedLeft:
 			isTiltedLeft = false
 			tilt_player(0, 0)
@@ -162,15 +167,18 @@ func _on_SprintTimer_timeout():
 
 func _on_InteractTimer_timeout():
 	if playerState == "ALIVE":
-		if interactRayCast.get_collider().has_method("use"):
-			if interactTimes == 1:
-				interactRayCast.get_collider().use("Slow")
+		if interactRayCast.get_collider():
+			if interactRayCast.get_collider().has_method("use"):
+				if interactTimes == 1:
+					interactRayCast.get_collider().use("Slow")
+				else:
+					interactRayCast.get_collider().use("Fast")
 			else:
-				interactRayCast.get_collider().use("Fast")
-			playerState = "OCCUPIED"
-		else:
-			print("This interactable has no use method yet...")
-		interactTimes = 0
+				print("This interactable has no use method yet...")
+			interactTimes = 0
 
 func itemDone():
 	playerState = "ALIVE"
+
+func occupyPlayer():
+	playerState = "OCCUPIED"

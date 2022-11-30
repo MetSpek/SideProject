@@ -12,7 +12,7 @@ height = 0.9
 collision_mask = 2
 script = ExtResource( 1 )
 
-[node name="CollisionShape" type="CollisionShape" parent="."]
+[node name="CollisionShape" type="CollisionShape" parent="." groups=["Player"]]
 transform = Transform( 1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0 )
 shape = SubResource( 1 )
 
@@ -30,7 +30,7 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0 )
 
 [node name="interactRayCast" type="RayCast" parent="Waist/Head"]
 enabled = true
-cast_to = Vector3( 0, 0, -2 )
+cast_to = Vector3( 0, 0, -2.5 )
 collision_mask = 4
 
 [node name="InteractTimer" type="Timer" parent="Waist/Head/interactRayCast"]
@@ -40,6 +40,16 @@ one_shot = true
 [node name="Hand" type="Spatial" parent="Waist/Head"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, -0.2, -0.273392 )
 script = ExtResource( 3 )
+
+[node name="tiltCheckLeft" type="RayCast" parent="Waist/Head"]
+enabled = true
+cast_to = Vector3( -0.75, 0, 0 )
+collision_mask = 2
+
+[node name="tiltCheckRight" type="RayCast" parent="Waist/Head"]
+enabled = true
+cast_to = Vector3( 0.75, 0, 0 )
+collision_mask = 2
 
 [node name="SprintTimer" type="Timer" parent="."]
 wait_time = 2.0

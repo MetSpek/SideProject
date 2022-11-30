@@ -33,6 +33,7 @@ func _ready():
 
 func use(method):
 	if isPlaying == false:
+		get_tree().call_group("Player", "occupyPlayer")
 		isPlaying = true
 		camera.current = true
 		pin.visible = true
@@ -67,10 +68,9 @@ func _physics_process(delta):
 func finish():
 	isPlaying = false
 	camera.current = false
-	pin.visible = false
-	unlockPin.visible = false
 	get_tree().call_group("Player", "itemDone")
 	get_tree().call_group("Object", "unlock")
+	queue_free()
 
 
 func _on_Timer_timeout():
